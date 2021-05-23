@@ -1,0 +1,11 @@
+// customize some Bootstrap variables
+// Your variable overrides
+.bg-light {
+    background-color: blue;
+};
+$body-bg: lightgrey;
+$body-color: #111;
+$primary: darken(#428bca, 20%);
+
+// the ~ allows you to reference things in node_modules
+@import "~bootstrap/scss/bootstrap";
