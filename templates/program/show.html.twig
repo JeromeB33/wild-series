@@ -10,10 +10,21 @@
     <p>{{ program.summary }}</p>
     <p>Catégorie : {{ program.category.name }}</p>
   </div>
+
+  <div class="media-body">
+    <ul>
+    {% for season in program.seasons %}
+      <li class="mt-0">Saison {{ season.number }} - {{season.year}}</li>
+      <a href='{{ path("program_season_show", { program: program.id,  season: season.id }) }}'>Voir détails</a>
+    {% endfor %}
+    </ul>
+  </div>
+  
 </div>
 
 <a href="{{ path('program_index') }}">
     Retour à la liste des programmes
 </a>
+{{ dump(program.seasons) }}
 
 {% endblock %}
