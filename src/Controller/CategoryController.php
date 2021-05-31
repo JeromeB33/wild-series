@@ -36,7 +36,7 @@ class CategoryController extends AbstractController
         /**
      * Getting programs by category
      *
-     * @Route("/show/{categoryName}", name="show")
+     * @Route("/{categoryName}", name="show")
      * @return Response
      */
     public function show(string $categoryName):Response

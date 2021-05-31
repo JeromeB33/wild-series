@@ -64,4 +64,12 @@ class ProgramController extends AbstractController
         return $this->render('program/season_show.html.twig', ['season' => $season, 'program' => $program]);
     }
 
+    /**
+     * @Route("/show/{program}/season/{season}/episode/{episode}", name="episode_show")
+     */     
+    public function showEpisode(Program $program, Season $season, Episode $episode):Response
+    {
+        return $this->render('program/episode_show.html.twig', ['episode' => $episode, 'season' => $season, 'program' => $program]);
+    }
+
 }
