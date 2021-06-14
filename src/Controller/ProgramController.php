@@ -11,6 +11,7 @@ use App\Entity\Category;
 use App\Entity\Season;
 use App\Entity\Episode;
 use App\Form\ProgramType;
+use App\Service\Slugify;
 
 /**
 * @Route("/programs", name="program_")
@@ -41,7 +42,7 @@ class ProgramController extends AbstractController
      *
      * @Route("/new", name="new")
      */
-    public function new(Request $request ) : Response
+    public function new(Request $request, Slugify $slugify ) : Response
     {
         // Create a new Program Object
         $program = new Program();
@@ -49,6 +50,8 @@ class ProgramController extends AbstractController
         $form = $this->createForm(ProgramType::class, $program);
                 // Get data from HTTP request
         $form->handleRequest($request);
+        $slug = $slugify->generate($program->getTitle());
+        $program->setSlug($slug);
         // Was the form submitted ?
         if ($form->isSubmitted() && $form->isValid()) {
             // Deal with the submitted data
@@ -68,29 +71,22 @@ class ProgramController extends AbstractController
     }
 
     /**
-     * Getting a program by id
-     *
-     * @Route("/show/{id<^[0-9]+$>}", methods={"GET"}, name="show")
+     * @param Program $program
      * @return Response
+     * @Route ("/{slug}", methods={"GET"}, name="show")
      */
-    public function show(int $id):Response
+    public function show(Program $program): Response
     {
-        $program = $this->getDoctrine()
-            ->getRepository(Program::class)
-            ->findOneBy(['id' => $id]);
-
-        if (!$program) {
-            throw $this->createNotFoundException(
-                'No program with id : '.$id.' found in program\'s table.'
-            );
+        if(!$program){
+            //throw $this->createNotFoundException()('No program with id : '.$id.' found in program\'s table.');
+            $message = 'No program with id : '.$program.' found in program\'s table.';
+            return $this->render('error404.html.twig', ['error' => $message]);
         }
-        return $this->render('program/show.html.twig', [
-            'program' => $program,
-        ]);
-    }
 
+        return $this->render('program/show.html.twig', ['program' => $program]);
+    }
     /**
-     * @Route("/show/{program}/season/{season}", name="season_show")
+     * @Route("/{slug}/season/{season}", name="season_show")
      */
     public function showSeason(Program $program, Season $season):Response
     {
@@ -98,7 +94,7 @@ class ProgramController extends AbstractController
     }
 
     /**
-     * @Route("/show/{program}/season/{season}/episode/{episode}", name="episode_show")
+     * @Route("/{slug}/season/{season}/episode/{episode}", name="episode_show")
      */     
     public function showEpisode(Program $program, Season $season, Episode $episode):Response
     {

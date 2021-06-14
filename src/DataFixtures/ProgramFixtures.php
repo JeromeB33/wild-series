@@ -6,14 +6,25 @@ use App\Entity\Program;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use App\Service\Slugify;
 
 class ProgramFixtures extends Fixture implements DependentFixtureInterface
 {
+    private $slugify;
+
+    public function __construct(Slugify $slugify)
+    {
+        $this->slugify = $slugify;
+    }
+
     public function load(ObjectManager $manager)
     {
         for ($j=0 ; $j < 5 ;$j++){
+            $title = 'Walking Dead';
         $program = new Program();
-        $program->setTitle('Walking dead'. $j);
+        $program->setTitle($title. $j);
+        $slug = $this->slugify->generate($title. $j);
+        $program->setSlug($slug);
         $program->setSummary('Des zombies envahissent la terre'.$j);
         $program->setCountry('USA');
         $program->setYear(2010);

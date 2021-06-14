@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\Slugify;
 
 /**
  * @Route("/episode")
@@ -28,11 +29,13 @@ class EpisodeController extends AbstractController
     /**
      * @Route("/new", name="episode_new", methods={"GET","POST"})
      */
-    public function new(Request $request): Response
+    public function new(Request $request, Slugify $slugify): Response
     {
         $episode = new Episode();
         $form = $this->createForm(EpisodeType::class, $episode);
         $form->handleRequest($request);
+        $slug = $slugify->generate($episode->getTitle());
+        $episode->setSlug($slug);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
@@ -49,7 +52,7 @@ class EpisodeController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="episode_show", methods={"GET"})
+     * @Route("/{slug}", name="episode_show", methods={"GET"})
      */
     public function show(Episode $episode): Response
     {
@@ -59,12 +62,14 @@ class EpisodeController extends AbstractController
     }
 
     /**
-     * @Route("/{id}/edit", name="episode_edit", methods={"GET","POST"})
+     * @Route("/{slug}/edit", name="episode_edit", methods={"GET","POST"})
      */
-    public function edit(Request $request, Episode $episode): Response
+    public function edit(Request $request, Episode $episode, Slugify $slugify): Response
     {
         $form = $this->createForm(EpisodeType::class, $episode);
         $form->handleRequest($request);
+        $slug = $slugify->generate($episode->getTitle());
+        $episode->setSlug($slug);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
