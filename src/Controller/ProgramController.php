@@ -8,10 +8,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Program;
 use App\Entity\Category;
+use App\Entity\Comment;
 use App\Entity\Season;
 use App\Entity\Episode;
 use App\Form\ProgramType;
+use App\Form\CommentType;
 use App\Service\Slugify;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 /**
 * @Route("/programs", name="program_")
@@ -21,7 +25,7 @@ class ProgramController extends AbstractController
 {
     /**
      * Show all rows from Program’s entity
-     *
+     * 
      * @Route("/", name="index")
      * @return Response A response instance
      */
@@ -42,7 +46,7 @@ class ProgramController extends AbstractController
      *
      * @Route("/new", name="new")
      */
-    public function new(Request $request, Slugify $slugify ) : Response
+    public function new(Request $request, Slugify $slugify, MailerInterface $mailer ) : Response
     {
         // Create a new Program Object
         $program = new Program();
@@ -50,17 +54,25 @@ class ProgramController extends AbstractController
         $form = $this->createForm(ProgramType::class, $program);
                 // Get data from HTTP request
         $form->handleRequest($request);
-        $slug = $slugify->generate($program->getTitle());
-        $program->setSlug($slug);
+
         // Was the form submitted ?
         if ($form->isSubmitted() && $form->isValid()) {
             // Deal with the submitted data
             // Get the Entity Manager
+            $slug = $slugify->generate($program->getTitle());
+            $program->setSlug($slug);
             $entityManager = $this->getDoctrine()->getManager();
             // Persist Program Object
             $entityManager->persist($program);
             // Flush the persisted object
             $entityManager->flush();
+            $email = (new Email())
+            ->from($this->getParameter('mailer_from'))
+            ->to('9d634b4a41-58996a@inbox.mailtrap.io')
+            ->subject('Une nouvelle série vient d\'être publiée !')
+            ->html($this->renderView('program/newProgramEmail.html.twig', ['program' => $program]));
+
+            $mailer->send($email);
             // Finally redirect to categories list
             return $this->redirectToRoute('program_index');
         }
@@ -86,6 +98,8 @@ class ProgramController extends AbstractController
         return $this->render('program/show.html.twig', ['program' => $program]);
     }
     /**
+     * @param Program $program
+     * @param Season $season
      * @Route("/{slug}/season/{season}", name="season_show")
      */
     public function showSeason(Program $program, Season $season):Response
@@ -94,11 +108,33 @@ class ProgramController extends AbstractController
     }
 
     /**
+     * @param Program $program
+     * @param Season $season
+     * @param Episode $episode
+     * @return Response
      * @Route("/{slug}/season/{season}/episode/{episode}", name="episode_show")
      */     
-    public function showEpisode(Program $program, Season $season, Episode $episode):Response
+    public function showEpisode(Program $program, Season $season, Episode $episode, Request $request):Response
     {
-        return $this->render('program/episode_show.html.twig', ['episode' => $episode, 'season' => $season, 'program' => $program]);
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            //recup the entity manager
+            $entityManager = $this->getDoctrine()->getManager();
+
+            /** @var \App\Entity\User $author */
+            $author = $this->getUser();
+
+            $comment->setAuthor($author);
+            $comment->setEpisode($episode);
+            // persist anf flush : ajout dans la base
+            $entityManager->persist($comment);
+            $entityManager->flush();
+        }
+        return $this->render('program/episode_show.html.twig', ['episode' => $episode, 'season' => $season, 'program' => $program, 'form' => $form->createView()]);
     }
 
 }

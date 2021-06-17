@@ -1,0 +1,9 @@
+{% extends './layoutEmail.html.twig'%}
+{% block title %}New episode{% endblock %}
+
+{% block body %}
+    <h1>Nouvel épisode "{{ episode.number }}" créé</h1>
+    <p>L'épisode {{ episode.title }} a été ajouté sur Wild Séries pour la série : {{episode.season.program.title}} saison : {{episode.season.number}}</p>
+    <p>Synopsis : {{episode.synopsis }}</p>
+    <a href="http://127.0.0.1:8001/programs/{{episode.season.program.slug}}/season/{{episode.season.id}}/episode/{{episode.id}}">Lien vers l'épisode</a>
+{% endblock %}
