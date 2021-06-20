@@ -66,6 +66,7 @@ class ProgramController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             // Persist Program Object
             $entityManager->persist($program);
+            $program->setOwner($this->getUser());
             // Flush the persisted object
             $entityManager->flush();
             $email = (new Email())
