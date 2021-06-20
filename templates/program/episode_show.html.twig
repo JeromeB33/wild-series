@@ -16,7 +16,9 @@
     {% for comment in episode.comments %}
       <h2>Auteur : {{ comment.author.email }}</h2>
         <p>{{ comment.comment }}</p><br/>
-
+        {% if is_granted("ROLE_ADMIN") or app.user is same as comment.author %}
+        {{ include('comment/_delete_form.html.twig') }}
+        {% endif %}
           <hr/>
         {% else %}
             <p>Pas de commentaires</p>

@@ -9,6 +9,9 @@
     <h1 class="mt-0">{{ program.title }}</h1>
     <p>{{ program.summary }}</p>
     <p>Catégorie : {{ program.category.name }}</p>
+    {% if is_granted("ROLE_ADMIN") %}
+    <a href="{{ path('program_edit', { 'slug': program.slug} ) }}">Éditer</a>
+    {% endif %}
   </div>
 
   <div class="media-body">
