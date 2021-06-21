@@ -188,6 +188,8 @@ class ProgramController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->flush();
 
-        return $this->render('program/show.html.twig', ['program' => $program]);
+        return $this->json([
+            'isInWatchlist' => $this->getUser()->isInWatchlist($program)
+        ]);
     }
 }
