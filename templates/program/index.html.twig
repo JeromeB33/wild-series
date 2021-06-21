@@ -8,7 +8,6 @@
     {{ form_widget(form) }}
     <button>Search</button>
     {{ form_end(form) }}
-    {{dump(programs)}}
     {% for program in programs %}
         <div>
             <h2>{{ loop.index }} / {{ program.title }} - Catégorie : {{ program.category.name }}</h2>

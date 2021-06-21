@@ -149,7 +149,7 @@ class ProgramController extends AbstractController
     }
 
     /**
-     * @Route("/programs/{slug}/edit", name="edit")
+     * @Route("/{slug}/edit", name="edit")
      */
     public function edit(Request $request, Program $program): Response
     {
@@ -171,5 +171,23 @@ class ProgramController extends AbstractController
             'program' => $program,
             'form' => $form->createView()
         ]);
+    }
+
+    /**
+     * @param Program $program
+     * @return Response
+     * @Route("/{program}/watchlist", name="watchlist", methods={"POST", "GET"})
+     */
+    public function addToWatchlist(Program $program):Response
+    {
+        if ($this->getUser()->isInWatchlist($program)){
+            $this->getUser()->removeFromWatchlist($program);
+        }else{
+            $this->getUser()->addToWatchlist($program);
+        }
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->flush();
+
+        return $this->render('program/show.html.twig', ['program' => $program]);
     }
 }
